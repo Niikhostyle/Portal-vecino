@@ -140,12 +140,15 @@ class SolicitudController extends Controller
     {
         $tipo = SolicitudTipo::findHabilitadoOrFail($tipoId);
 
-        $request->validate(array_merge([
-            'vecino_id' => 'required|exists:users,id',
-            'datos' => 'required|array',
-            // Solo permitir PDF y JPG/JPEG
-            'adjuntos.*' => 'file|mimes:pdf,jpg,jpeg|max:5120',
-        ], $tipo->reglasValidacionStore()));
+        $request->validate(
+            array_merge([
+                'vecino_id' => 'required|exists:users,id',
+                'datos' => 'required|array',
+                // Solo permitir PDF y JPG/JPEG
+                'adjuntos.*' => 'file|mimes:pdf,jpg,jpeg|max:5120',
+            ], $tipo->reglasValidacionStore()),
+            $tipo->mensajesValidacionStore()
+        );
 
         $vecino = User::findOrFail($request->vecino_id);
         if ($vecino->rol !== 'vecino') {

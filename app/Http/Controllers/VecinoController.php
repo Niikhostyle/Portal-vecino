@@ -83,11 +83,14 @@ class VecinoController extends Controller
     {
         $tipo = SolicitudTipo::findHabilitadoOrFail($tipoId);
 
-        $request->validate(array_merge([
-            'datos' => 'required|array',
-            // Solo permitir PDF y JPG/JPEG
-            'adjuntos.*' => 'file|mimes:pdf,jpg,jpeg|max:5120', // 5MB max
-        ], $tipo->reglasValidacionStore()));
+        $request->validate(
+            array_merge([
+                'datos' => 'required|array',
+                // Solo permitir PDF y JPG/JPEG
+                'adjuntos.*' => 'file|mimes:pdf,jpg,jpeg|max:5120', // 5MB max
+            ], $tipo->reglasValidacionStore()),
+            $tipo->mensajesValidacionStore()
+        );
 
         DB::beginTransaction();
         try {

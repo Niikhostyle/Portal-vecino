@@ -173,7 +173,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Asunto <span class="text-red-500">*</span></label>
-                        <input type="text" name="datos[asunto]" required maxlength="255" placeholder="Resumen breve de su solicitud"
+                        <input type="text" name="datos[asunto]" required minlength="5" maxlength="255" placeholder="Resumen breve de su solicitud (mín. 5 caracteres)"
                                class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 bg-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                     </div>
                     <div>
@@ -612,20 +612,47 @@ function validateStep(step) {
     const stepEl = document.getElementById(`step${step}`);
     const inputs = stepEl.querySelectorAll('input[required]:not([disabled]), select[required]:not([disabled]), textarea[required]:not([disabled])');
     let valid = true;
+    let firstMessage = '';
     
     inputs.forEach(input => {
+        const value = String(input.value || '').trim();
         const isEmpty = input.type === 'file'
             ? !input.files || input.files.length === 0
-            : !String(input.value || '').trim();
+            : !value;
+
+        input.classList.remove('border-red-300', 'ring-2', 'ring-red-200');
 
         if (isEmpty) {
             input.classList.add('border-red-300', 'ring-2', 'ring-red-200');
             valid = false;
-        } else {
-            input.classList.remove('border-red-300', 'ring-2', 'ring-red-200');
+            if (!firstMessage) {
+                firstMessage = 'Complete todos los campos obligatorios del paso ' + step + '.';
+            }
+            return;
+        }
+
+        const minLen = input.getAttribute('minlength');
+        if (minLen && value.length < parseInt(minLen, 10)) {
+            input.classList.add('border-red-300', 'ring-2', 'ring-red-200');
+            valid = false;
+            if (!firstMessage) {
+                const label = input.closest('div')?.querySelector('label')?.textContent?.replace('*', '').trim() || 'Este campo';
+                firstMessage = label + ' debe tener al menos ' + minLen + ' caracteres.';
+            }
+        }
+
+        const maxLen = input.getAttribute('maxlength');
+        if (maxLen && value.length > parseInt(maxLen, 10)) {
+            input.classList.add('border-red-300', 'ring-2', 'ring-red-200');
+            valid = false;
+            if (!firstMessage) {
+                const label = input.closest('div')?.querySelector('label')?.textContent?.replace('*', '').trim() || 'Este campo';
+                firstMessage = label + ' no puede superar ' + maxLen + ' caracteres.';
+            }
         }
     });
     
+    validateStep.lastMessage = firstMessage;
     return valid;
 }
 
@@ -636,7 +663,7 @@ function validateAllSteps() {
             Swal.fire({
                 icon: 'warning',
                 title: 'Datos incompletos',
-                text: 'Revise el paso ' + step + ' antes de enviar la solicitud.',
+                text: validateStep.lastMessage || ('Revise el paso ' + step + ' antes de enviar la solicitud.'),
             });
             return false;
         }

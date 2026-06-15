@@ -73,6 +73,24 @@ class SolicitudTipo extends Model
         return [];
     }
 
+    /** Mensajes de validación en español para reglasValidacionStore(). */
+    public function mensajesValidacionStore(): array
+    {
+        if ($this->esOirs()) {
+            return [
+                'datos.tipo_oirs.required' => 'Seleccione el tipo de solicitud OIRS.',
+                'datos.tipo_oirs.in' => 'El tipo de solicitud OIRS no es válido.',
+                'datos.asunto.required' => 'El asunto es obligatorio.',
+                'datos.asunto.min' => 'El asunto debe tener al menos 5 caracteres.',
+                'datos.asunto.max' => 'El asunto no puede superar 255 caracteres.',
+                'datos.detalle.required' => 'El detalle de la solicitud es obligatorio.',
+                'datos.detalle.min' => 'El detalle debe tener al menos 20 caracteres. Describa su solicitud con mayor detalle.',
+            ];
+        }
+
+        return [];
+    }
+
     /**
      * Devuelve los campos habilitados para este tipo (requisitos aplicados).
      * requisitos_json puede ser: array de strings (legacy = solo documentos) o array con 'campos' => [...].
