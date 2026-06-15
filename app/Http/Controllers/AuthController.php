@@ -83,25 +83,11 @@ class AuthController extends Controller
             $rawData = $claveUnicaUser->getRaw();
             \Log::info('Datos raw de Clave Única', ['raw' => $rawData]);
             
-            // claveunica_id = "sub" (identificador único OpenID Connect), NO RolUnico.numero
+            // claveunica_id = "sub" (identificador único OpenID Connect)
             $claveunicaId = isset($rawData['sub']) ? (string) $rawData['sub'] : ($claveUnicaUser->id ? (string) $claveUnicaUser->id : null);
-            // run y dv vienen de RolUnico (el provider mapea id=numero por error; extraer desde raw)
-            $run = null;
-            $dv = null;
-            if (! empty($rawData['RolUnico']) && is_array($rawData['RolUnico'])) {
-                $run = isset($rawData['RolUnico']['numero']) ? (string) $rawData['RolUnico']['numero'] : null;
-                $dv = isset($rawData['RolUnico']['DV']) ? (string) $rawData['RolUnico']['DV'] : null;
-            }
-            if (! $run && isset($claveUnicaUser->run)) {
-                $run = (string) $claveUnicaUser->run;
-            }
-            if (! $dv && isset($claveUnicaUser->dv)) {
-                $dv = (string) $claveUnicaUser->dv;
-            }
-            // Fallback: el provider mapea RolUnico.numero al id del usuario Socialite
-            if (! $run && $claveUnicaUser->id && preg_match('/^\d{1,8}$/', (string) $claveUnicaUser->id)) {
-                $run = (string) $claveUnicaUser->id;
-            }
+
+            ['run' => $run, 'dv' => $dv] = User::extraerRunDvDesdeRaw($rawData, $claveUnicaUser);
+
             $email = isset($claveUnicaUser->email) ? (string) $claveUnicaUser->email : null;
             
             // Nombre completo: construir desde raw (Clave Única envía name.nombres y name.apellidos)
@@ -166,7 +152,7 @@ class AuthController extends Controller
                     $updateData['run'] = (string) $run;
                 }
                 if ($dv) {
-                    $updateData['dv'] = (string) $dv;
+                    $updateData['dv'] = strtoupper((string) $dv);
                 }
                 if ($email && ! $user->email) {
                     $updateData['email'] = (string) $email;
@@ -182,7 +168,7 @@ class AuthController extends Controller
                     'claveunica_id' => $claveunicaId ? (string) $claveunicaId : null,
                     'name' => (string) $name,
                     'run' => $run ? (string) $run : null,
-                    'dv' => $dv ? (string) $dv : null,
+                    'dv' => $dv ? strtoupper((string) $dv) : null,
                     'email' => $email ? (string) $email : null,
                     'password' => null, // Sin password para usuarios de Clave Única
                     'rol' => 'vecino', // Por defecto vecino
@@ -196,6 +182,8 @@ class AuthController extends Controller
 
             // Autenticar al usuario
             Auth::login($user, true);
+
+            session(['claveunica_raw' => $rawData]);
             
             return redirect()->intended(route('dashboard'));
         } catch (\Illuminate\Contracts\Container\BindingResolutionException $e) {
@@ -233,8 +221,6 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
-        // Redirigir a Clave Única para cerrar sesión allí y luego volver al login
         $endSessionUrl = config('services.claveunica.end_session_url');
         $returnTo = URL::route('login');
 

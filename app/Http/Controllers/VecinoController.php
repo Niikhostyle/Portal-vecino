@@ -73,6 +73,7 @@ class VecinoController extends Controller
         }
 
         $ciudadano = auth()->user();
+        $ciudadano->asegurarIdentidadClaveUnica();
         $datosPrecargados = $ciudadano->datosPrecargadosSolicitud();
 
         return view('vecino.solicitudes.wizard', compact('tipo', 'recintos', 'datosPrecargados', 'ciudadano'));

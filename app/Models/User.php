@@ -102,6 +102,13 @@ class User extends Authenticatable
             return (string) $this->claveunica_id;
         }
 
+        if ($this->claveunica_id) {
+            $parsed = self::parseRutComponents((string) $this->claveunica_id);
+            if ($parsed['run']) {
+                return $parsed['run'];
+            }
+        }
+
         return null;
     }
 
@@ -109,11 +116,144 @@ class User extends Authenticatable
     public function rutFormateado(): ?string
     {
         $run = $this->runNormalizado();
-        if (! $run || ! $this->dv) {
+        if (! $run) {
             return null;
         }
 
-        return number_format((int) $run, 0, '', '.') . '-' . strtoupper((string) $this->dv);
+        $dv = $this->dv ? strtoupper((string) $this->dv) : null;
+        if (! $dv && $this->claveunica_id) {
+            $parsed = self::parseRutComponents((string) $this->claveunica_id);
+            $dv = $parsed['dv'] ?? null;
+        }
+
+        if (! $dv) {
+            return null;
+        }
+
+        return number_format((int) $run, 0, '', '.') . '-' . $dv;
+    }
+
+    /**
+     * Parsea RUN y DV desde texto (ej: "12345678-9", "12.345.678-K").
+     *
+     * @return array{run: ?string, dv: ?string}
+     */
+    public static function parseRutComponents(?string $texto): array
+    {
+        if ($texto === null || trim($texto) === '') {
+            return ['run' => null, 'dv' => null];
+        }
+
+        $texto = strtoupper(trim(str_replace('.', '', $texto)));
+
+        if (preg_match('/^(\d{1,8})-([\dK])$/', $texto, $matches)) {
+            return [
+                'run' => ltrim($matches[1], '0') ?: '0',
+                'dv' => $matches[2],
+            ];
+        }
+
+        if (preg_match('/^(\d{1,8})$/', $texto, $matches)) {
+            return [
+                'run' => ltrim($matches[1], '0') ?: '0',
+                'dv' => null,
+            ];
+        }
+
+        return ['run' => null, 'dv' => null];
+    }
+
+    /**
+     * Extrae RUN y DV desde la respuesta userinfo de Clave Única.
+     *
+     * @return array{run: ?string, dv: ?string}
+     */
+    public static function extraerRunDvDesdeRaw(array $raw, ?object $socialiteUser = null): array
+    {
+        $run = null;
+        $dv = null;
+
+        $rol = $raw['RolUnico'] ?? $raw['rolUnico'] ?? null;
+        if (is_array($rol)) {
+            if (isset($rol['numero'])) {
+                $runDigits = preg_replace('/\D/', '', (string) $rol['numero']);
+                if ($runDigits !== '') {
+                    $run = ltrim($runDigits, '0') ?: '0';
+                }
+            }
+            foreach (['DV', 'dv', 'D'] as $key) {
+                if (! empty($rol[$key])) {
+                    $dv = strtoupper(substr((string) $rol[$key], 0, 1));
+                    break;
+                }
+            }
+        }
+
+        if ($socialiteUser) {
+            if (! $run && ! empty($socialiteUser->run)) {
+                $runDigits = preg_replace('/\D/', '', (string) $socialiteUser->run);
+                if ($runDigits !== '') {
+                    $run = ltrim($runDigits, '0') ?: '0';
+                }
+            }
+            if (! $dv && ! empty($socialiteUser->dv)) {
+                $dv = strtoupper(substr((string) $socialiteUser->dv, 0, 1));
+            }
+            if (! $run && ! empty($socialiteUser->id) && preg_match('/^\d{1,8}$/', (string) $socialiteUser->id)) {
+                $run = (string) $socialiteUser->id;
+            }
+        }
+
+        foreach (['sub', 'run'] as $claim) {
+            if ((! $run || ! $dv) && ! empty($raw[$claim]) && is_string($raw[$claim])) {
+                $parsed = self::parseRutComponents($raw[$claim]);
+                $run = $run ?? $parsed['run'];
+                $dv = $dv ?? $parsed['dv'];
+            }
+        }
+
+        if ($run && ! preg_match('/^\d{1,8}$/', $run)) {
+            $run = null;
+        }
+
+        return ['run' => $run, 'dv' => $dv];
+    }
+
+    /** Persiste RUN/DV en BD si faltan y hay datos raw de Clave Única en sesión. */
+    public function asegurarIdentidadClaveUnica(): void
+    {
+        if ($this->rutFormateado()) {
+            return;
+        }
+
+        $raw = session('claveunica_raw');
+        if (! is_array($raw) || empty($raw)) {
+            return;
+        }
+
+        $this->sincronizarRunDvDesdeRaw($raw);
+        $this->refresh();
+    }
+
+    /** Actualiza run/dv en BD desde datos raw de Clave Única. */
+    public function sincronizarRunDvDesdeRaw(array $raw, ?object $socialiteUser = null): bool
+    {
+        ['run' => $run, 'dv' => $dv] = self::extraerRunDvDesdeRaw($raw, $socialiteUser);
+
+        if (! $run || ! $dv) {
+            return false;
+        }
+
+        if ($this->run === $run && strtoupper((string) $this->dv) === $dv) {
+            return true;
+        }
+
+        $this->update([
+            'run' => $run,
+            'dv' => $dv,
+        ]);
+
+        return true;
     }
 
     /** Nombre y RUT oficiales obtenidos al iniciar sesión con Clave Única. */
