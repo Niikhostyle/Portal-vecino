@@ -151,7 +151,7 @@ class AuthController extends Controller
                 if ($run) {
                     $updateData['run'] = (string) $run;
                 }
-                if ($dv) {
+                if ($dv !== null && $dv !== '') {
                     $updateData['dv'] = strtoupper((string) $dv);
                 }
                 if ($email && ! $user->email) {
@@ -162,13 +162,12 @@ class AuthController extends Controller
                 
                 $user->update($updateData);
             } else {
-                // Crear nuevo usuario como vecino por defecto
                 // Asegurar que todos los valores sean strings o null antes de crear
                 $userData = [
                     'claveunica_id' => $claveunicaId ? (string) $claveunicaId : null,
                     'name' => (string) $name,
                     'run' => $run ? (string) $run : null,
-                    'dv' => $dv ? strtoupper((string) $dv) : null,
+                    'dv' => ($dv !== null && $dv !== '') ? strtoupper((string) $dv) : null,
                     'email' => $email ? (string) $email : null,
                     'password' => null, // Sin password para usuarios de Clave Única
                     'rol' => 'vecino', // Por defecto vecino
@@ -179,6 +178,9 @@ class AuthController extends Controller
                 
                 $user = User::create($userData);
             }
+
+            $user->completarRunDvEnBd();
+            $user->refresh();
 
             // Autenticar al usuario
             Auth::login($user, true);

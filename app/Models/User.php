@@ -112,6 +112,48 @@ class User extends Authenticatable
         return null;
     }
 
+    /** Calcula el dígito verificador de un RUN chileno. */
+    public static function calcularDvChileno(string $run): string
+    {
+        $run = preg_replace('/\D/', '', $run);
+        $sum = 0;
+        $mul = 2;
+
+        for ($i = strlen($run) - 1; $i >= 0; $i--) {
+            $sum += (int) $run[$i] * $mul;
+            $mul = $mul === 7 ? 2 : $mul + 1;
+        }
+
+        $rest = 11 - ($sum % 11);
+
+        return match ($rest) {
+            11 => '0',
+            10 => 'K',
+            default => (string) $rest,
+        };
+    }
+
+    /** DV almacenado o calculado desde el RUN. */
+    public function dvResuelto(): ?string
+    {
+        if ($this->dv !== null && $this->dv !== '') {
+            return strtoupper(substr((string) $this->dv, 0, 1));
+        }
+
+        if ($this->claveunica_id) {
+            $parsed = self::parseRutComponents((string) $this->claveunica_id);
+            if ($parsed['dv'] !== null && $parsed['dv'] !== '') {
+                return $parsed['dv'];
+            }
+        }
+
+        if ($run = $this->runNormalizado()) {
+            return self::calcularDvChileno($run);
+        }
+
+        return null;
+    }
+
     /** RUT formateado desde datos de Clave Única (ej: 12.345.678-9). */
     public function rutFormateado(): ?string
     {
@@ -120,13 +162,8 @@ class User extends Authenticatable
             return null;
         }
 
-        $dv = $this->dv ? strtoupper((string) $this->dv) : null;
-        if (! $dv && $this->claveunica_id) {
-            $parsed = self::parseRutComponents((string) $this->claveunica_id);
-            $dv = $parsed['dv'] ?? null;
-        }
-
-        if (! $dv) {
+        $dv = $this->dvResuelto();
+        if ($dv === null) {
             return null;
         }
 
@@ -182,7 +219,7 @@ class User extends Authenticatable
                 }
             }
             foreach (['DV', 'dv', 'D'] as $key) {
-                if (! empty($rol[$key])) {
+                if (array_key_exists($key, $rol) && $rol[$key] !== null && $rol[$key] !== '') {
                     $dv = strtoupper(substr((string) $rol[$key], 0, 1));
                     break;
                 }
@@ -190,13 +227,13 @@ class User extends Authenticatable
         }
 
         if ($socialiteUser) {
-            if (! $run && ! empty($socialiteUser->run)) {
+            if (! $run && isset($socialiteUser->run) && $socialiteUser->run !== '') {
                 $runDigits = preg_replace('/\D/', '', (string) $socialiteUser->run);
                 if ($runDigits !== '') {
                     $run = ltrim($runDigits, '0') ?: '0';
                 }
             }
-            if (! $dv && ! empty($socialiteUser->dv)) {
+            if ($dv === null && isset($socialiteUser->dv) && $socialiteUser->dv !== '') {
                 $dv = strtoupper(substr((string) $socialiteUser->dv, 0, 1));
             }
             if (! $run && ! empty($socialiteUser->id) && preg_match('/^\d{1,8}$/', (string) $socialiteUser->id)) {
@@ -216,22 +253,48 @@ class User extends Authenticatable
             $run = null;
         }
 
+        if ($run && ($dv === null || $dv === '')) {
+            $dv = self::calcularDvChileno($run);
+        }
+
         return ['run' => $run, 'dv' => $dv];
+    }
+
+    /** Completa run/dv en BD para usuarios legacy (run sin dv). */
+    public function completarRunDvEnBd(): void
+    {
+        $run = $this->runNormalizado();
+        if (! $run) {
+            return;
+        }
+
+        $dv = $this->dvResuelto();
+        if ($dv === null) {
+            return;
+        }
+
+        $needsUpdate = $this->run !== $run
+            || $this->dv === null
+            || $this->dv === ''
+            || strtoupper((string) $this->dv) !== $dv;
+
+        if ($needsUpdate) {
+            $this->update([
+                'run' => $run,
+                'dv' => $dv,
+            ]);
+        }
     }
 
     /** Persiste RUN/DV en BD si faltan y hay datos raw de Clave Única en sesión. */
     public function asegurarIdentidadClaveUnica(): void
     {
-        if ($this->rutFormateado()) {
-            return;
-        }
-
         $raw = session('claveunica_raw');
-        if (! is_array($raw) || empty($raw)) {
-            return;
+        if (is_array($raw) && ! empty($raw)) {
+            $this->sincronizarRunDvDesdeRaw($raw);
         }
 
-        $this->sincronizarRunDvDesdeRaw($raw);
+        $this->completarRunDvEnBd();
         $this->refresh();
     }
 
@@ -240,8 +303,12 @@ class User extends Authenticatable
     {
         ['run' => $run, 'dv' => $dv] = self::extraerRunDvDesdeRaw($raw, $socialiteUser);
 
-        if (! $run || ! $dv) {
+        if (! $run) {
             return false;
+        }
+
+        if ($dv === null || $dv === '') {
+            $dv = self::calcularDvChileno($run);
         }
 
         if ($this->run === $run && strtoupper((string) $this->dv) === $dv) {
