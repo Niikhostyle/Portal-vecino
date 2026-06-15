@@ -59,18 +59,23 @@ class Solicitud extends Model
         return $this->hasOne(RecintoReserva::class, 'solicitud_id');
     }
 
-    /** Correo del vecino para notificaciones (cuenta o dato ingresado en la solicitud). */
+    /** Correo del vecino para notificaciones (prioriza el ingresado en la solicitud). */
     public function emailNotificacionVecino(): ?string
     {
+        $datos = $this->datos_json ?? [];
+        foreach (['email', 'mail'] as $campo) {
+            $email = $datos[$campo] ?? null;
+            if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                return $email;
+            }
+        }
+
         $this->loadMissing('vecino');
 
         if ($this->vecino?->email && filter_var($this->vecino->email, FILTER_VALIDATE_EMAIL)) {
             return $this->vecino->email;
         }
 
-        $datos = $this->datos_json ?? [];
-        $email = $datos['email'] ?? $datos['mail'] ?? null;
-
-        return ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) ? $email : null;
+        return null;
     }
 }

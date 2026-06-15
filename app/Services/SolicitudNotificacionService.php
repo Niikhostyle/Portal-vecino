@@ -16,12 +16,20 @@ class SolicitudNotificacionService
         $email = $solicitud->emailNotificacionVecino();
 
         if (! $email) {
-            Log::info('Sin correo para notificación de solicitud creada', ['folio' => $solicitud->folio]);
+            Log::warning('Sin correo para notificación de solicitud creada', [
+                'folio' => $solicitud->folio,
+                'vecino_id' => $solicitud->vecino_id,
+            ]);
 
             return;
         }
 
         Mail::to($email)->send(new SolicitudCreadaMail($solicitud));
+
+        Log::info('Correo de solicitud creada enviado', [
+            'folio' => $solicitud->folio,
+            'destino' => $email,
+        ]);
     }
 
     public static function enviarNotificacionRespuesta(Solicitud $solicitud): void
@@ -30,12 +38,20 @@ class SolicitudNotificacionService
         $email = $solicitud->emailNotificacionVecino();
 
         if (! $email) {
-            Log::info('Sin correo para notificación de solicitud respondida', ['folio' => $solicitud->folio]);
+            Log::warning('Sin correo para notificación de solicitud respondida', [
+                'folio' => $solicitud->folio,
+                'vecino_id' => $solicitud->vecino_id,
+            ]);
 
             return;
         }
 
         Mail::to($email)->send(new SolicitudRespondidaMail($solicitud));
+
+        Log::info('Correo de solicitud respondida enviado', [
+            'folio' => $solicitud->folio,
+            'destino' => $email,
+        ]);
     }
 
     /** Envía correo sin interrumpir el flujo principal si falla el SMTP. */
@@ -44,8 +60,9 @@ class SolicitudNotificacionService
         try {
             self::enviarConfirmacionCreacion($solicitud);
         } catch (\Throwable $e) {
-            Log::warning('No se pudo enviar correo de solicitud creada', [
+            Log::error('No se pudo enviar correo de solicitud creada', [
                 'folio' => $solicitud->folio,
+                'destino' => $solicitud->emailNotificacionVecino(),
                 'error' => $e->getMessage(),
             ]);
         }
@@ -56,8 +73,9 @@ class SolicitudNotificacionService
         try {
             self::enviarNotificacionRespuesta($solicitud);
         } catch (\Throwable $e) {
-            Log::warning('No se pudo enviar correo de solicitud respondida', [
+            Log::error('No se pudo enviar correo de solicitud respondida', [
                 'folio' => $solicitud->folio,
+                'destino' => $solicitud->emailNotificacionVecino(),
                 'error' => $e->getMessage(),
             ]);
         }

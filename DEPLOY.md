@@ -177,3 +177,36 @@ git add public/build && git commit -m "Rebuild assets" && git push
 - [ ] Permisos `775` en `storage/` y `bootstrap/cache/`
 - [ ] Callback de ClaveÚnica apunta al dominio de producción
 - [ ] SMTP configurado para notificaciones por correo
+
+### Correo (notificaciones al vecino)
+
+En producción el `.env` **debe** tener SMTP real (no `mailpit` ni `log`):
+
+```env
+MAIL_MAILER=smtp
+MAIL_SCHEME=null
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=noreply@chanco.cl
+MAIL_PASSWORD=contraseña_de_aplicacion_google
+MAIL_FROM_ADDRESS="noreply@chanco.cl"
+MAIL_FROM_NAME="Portal Ciudadano"
+```
+
+Probar envío desde el servidor:
+
+```bash
+php artisan config:clear
+php artisan portal:test-correo vecino@ejemplo.com
+```
+
+Revisar logs si no llega:
+
+```bash
+grep -i "correo\|mail" storage/logs/laravel.log | tail -20
+```
+
+Mensajes útiles:
+- `Correo de solicitud creada enviado` → SMTP OK
+- `Sin correo para notificación` → el vecino no tenía email en la solicitud
+- `No se pudo enviar correo` → error SMTP (credenciales, firewall, etc.)

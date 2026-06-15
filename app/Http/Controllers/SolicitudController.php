@@ -225,6 +225,7 @@ class SolicitudController extends Controller
             DB::commit();
 
             $solicitud->refresh();
+            $solicitud->unsetRelation('vecino');
             SolicitudNotificacionService::enviarConfirmacionCreacionSeguro($solicitud);
 
             return response()->json([
