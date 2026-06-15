@@ -96,6 +96,43 @@ chmod -R 775 storage bootstrap/cache
 - El DocumentRoot puede apuntar a la raíz del proyecto o directamente a `public/`.
 - Ver también: `SOLUCION_HOSTING_COMPARTIDO.md` y `SOLUCION_FORBIDDEN.md`.
 
+### Base de datos MySQL (error `Connection refused`)
+
+En hosting compartido **no uses** `DB_HOST=127.0.0.1` salvo que el panel lo indique. Lo habitual es:
+
+```env
+DB_HOST=localhost
+```
+
+Los nombres suelen llevar prefijo del usuario de hosting, por ejemplo:
+
+```env
+DB_DATABASE=portalve2_portal
+DB_USERNAME=portalve2_portal
+DB_PASSWORD=la_clave_del_panel
+```
+
+**Pasos en cPanel / Plesk:**
+
+1. Crear base de datos MySQL
+2. Crear usuario MySQL y asignarlo a la base con **todos los privilegios**
+3. Copiar **host**, **nombre de BD**, **usuario** y **contraseña** del panel
+4. Editar `.env` en el servidor: `nano .env`
+5. Limpiar caché y migrar:
+
+```bash
+php artisan config:clear
+php artisan migrate --seed --force
+```
+
+Probar conexión antes de migrar:
+
+```bash
+php artisan db:show
+```
+
+Si falla, prueba también el host que muestre el panel (a veces es `localhost:/ruta/mysql.sock` o un hostname interno).
+
 ---
 
 ## 5. Clave Única
