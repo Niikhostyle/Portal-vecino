@@ -80,7 +80,7 @@
                 </div>
 
                 <h1 class="mt-4 text-2xl font-bold sm:text-3xl" style="color: #ffffff;">
-                    Bienvenido, {{ $saludoNombre }}
+                    Bienvenido/a, {{ $saludoNombre }}
                 </h1>
                 <p class="mt-2 max-w-2xl text-sm leading-relaxed sm:text-base" style="color: #dbeafe;">
                     Oficina de Informaciones, Reclamos y Sugerencias. Aquí puedes enviar tu solicitud
