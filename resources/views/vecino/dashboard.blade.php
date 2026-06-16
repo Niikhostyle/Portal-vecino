@@ -109,34 +109,34 @@
                 </div>
             </div>
 
-            {{-- KPIs en columna vertical --}}
-            <div class="lg:col-span-1">
+            {{-- KPIs en columna vertical (se estiran para igualar la altura de las cajas) --}}
+            <div class="flex flex-col lg:col-span-1">
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">Mi resumen</h2>
-                <div class="mt-3 flex flex-col gap-4">
-                    <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="mt-3 flex flex-1 flex-col gap-4">
+                    <div class="flex flex-1 items-center justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                         <div>
                             <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Total</p>
-                            <p class="mt-1 text-2xl font-bold text-slate-900">{{ $stats['total'] }}</p>
+                            <p class="mt-1 text-3xl font-bold text-slate-900">{{ $stats['total'] }}</p>
                         </div>
-                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg" style="background-color: #f1f5f9; color: #475569;">
+                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-lg" style="background-color: #f1f5f9; color: #475569;">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         </span>
                     </div>
-                    <div class="flex items-center justify-between rounded-xl border border-amber-200 p-5 shadow-sm" style="background-color: #fffbeb;">
+                    <div class="flex flex-1 items-center justify-between rounded-2xl border border-amber-200 p-5 shadow-sm" style="background-color: #fffbeb;">
                         <div>
                             <p class="text-[11px] font-semibold uppercase tracking-wider" style="color: #92400e;">En trámite</p>
-                            <p class="mt-1 text-2xl font-bold" style="color: #78350f;">{{ $stats['pendientes'] }}</p>
+                            <p class="mt-1 text-3xl font-bold" style="color: #78350f;">{{ $stats['pendientes'] }}</p>
                         </div>
-                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg" style="background-color: #fef3c7; color: #d97706;">
+                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-lg" style="background-color: #fef3c7; color: #d97706;">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </span>
                     </div>
-                    <div class="flex items-center justify-between rounded-xl border border-emerald-200 p-5 shadow-sm" style="background-color: #ecfdf5;">
+                    <div class="flex flex-1 items-center justify-between rounded-2xl border border-emerald-200 p-5 shadow-sm" style="background-color: #ecfdf5;">
                         <div>
                             <p class="text-[11px] font-semibold uppercase tracking-wider" style="color: #065f46;">Resueltas</p>
-                            <p class="mt-1 text-2xl font-bold" style="color: #064e3b;">{{ $stats['respondida'] }}</p>
+                            <p class="mt-1 text-3xl font-bold" style="color: #064e3b;">{{ $stats['respondida'] }}</p>
                         </div>
-                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg" style="background-color: #d1fae5; color: #059669;">
+                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-lg" style="background-color: #d1fae5; color: #059669;">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </span>
                     </div>
@@ -144,24 +144,24 @@
             </div>
         </div>
 
-        {{-- GRÁFICOS --}}
-        <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-5">
-            <div class="lg:col-span-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        {{-- GRÁFICOS (mismo tamaño, alineados) --}}
+        <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p class="text-sm font-semibold text-slate-900">Mi actividad (6 meses)</p>
-                <div class="mt-3 h-44">
+                <div class="mt-4 h-72 flex-1">
                     <canvas id="chartActividad"></canvas>
                 </div>
             </div>
-            <div class="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p class="text-sm font-semibold text-slate-900">Por estado</p>
-                <div class="mt-3 h-44">
+                <div class="mt-4 h-72 flex-1">
                     <canvas id="chartEstado"></canvas>
                 </div>
             </div>
         </div>
 
         {{-- ÚLTIMAS SOLICITUDES --}}
-        <div class="mt-5 rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 sm:px-5">
                 <p class="text-sm font-semibold text-slate-900">Mis últimas solicitudes</p>
                 <a href="{{ route('vecino.mis-solicitudes') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-700">
