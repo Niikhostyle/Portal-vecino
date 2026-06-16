@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Solicitud;
 use App\Models\SolicitudTipo;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -42,7 +43,9 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'solicitudes_recientes'));
+        [$oirsStats, $oirsCharts, $oirsUltimas] = $this->buildOirsDashboardData(false);
+
+        return view('admin.dashboard', compact('stats', 'solicitudes_recientes', 'oirsStats', 'oirsCharts', 'oirsUltimas'));
     }
 
     private function dashboardOP()
@@ -60,7 +63,9 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        return view('op.dashboard', compact('nuevas_solicitudes', 'stats'));
+        [$oirsStats, $oirsCharts, $oirsUltimas] = $this->buildOirsDashboardData(true);
+
+        return view('op.dashboard', compact('nuevas_solicitudes', 'stats', 'oirsStats', 'oirsCharts', 'oirsUltimas'));
     }
 
     private function dashboardFuncionario()
@@ -117,22 +122,133 @@ class DashboardController extends Controller
         ];
         $stats['pendientes'] = $stats['enviada'] + $stats['en_revision_op'] + $stats['derivada'] + $stats['en_gestion'];
 
-        // Últimos 6 meses para el gráfico
-        $meses = [];
+        $labels = [];
+        $serieTotal = [];
         for ($i = 5; $i >= 0; $i--) {
             $fecha = now()->subMonths($i);
-            $meses[] = [
-                'label' => $fecha->translatedFormat('M y'),
-                'total' => (clone $baseQuery)->whereYear('created_at', $fecha->year)->whereMonth('created_at', $fecha->month)->count(),
-            ];
+            $labels[] = $fecha->translatedFormat('M');
+            $serieTotal[] = (clone $baseQuery)
+                ->whereYear('created_at', $fecha->year)
+                ->whereMonth('created_at', $fecha->month)
+                ->count();
         }
+
+        $charts = [
+            'labels' => $labels,
+            'serie_total' => $serieTotal,
+            'por_estado' => [
+                'pendientes' => $stats['pendientes'],
+                'respondidas' => $stats['respondida'],
+                'rechazadas' => $stats['rechazada'],
+            ],
+            'por_tipo' => Solicitud::query()
+                ->where('vecino_id', $userId)
+                ->join('solicitud_tipos', 'solicitudes.tipo_id', '=', 'solicitud_tipos.id')
+                ->select('solicitud_tipos.titulo', DB::raw('COUNT(*) as total'))
+                ->groupBy('solicitud_tipos.titulo')
+                ->orderByDesc('total')
+                ->limit(5)
+                ->pluck('total', 'titulo')
+                ->all(),
+        ];
 
         $mis_solicitudes = Solicitud::with(['tipo', 'asignado'])
             ->where('vecino_id', $userId)
             ->orderBy('created_at', 'desc')
-            ->limit(6)
+            ->limit(5)
             ->get();
 
-        return view('vecino.dashboard', compact('stats', 'meses', 'mis_solicitudes'));
+        // Tipo OIRS para enlazar las cajas de bienvenida directamente al formulario
+        $oirsTipo = SolicitudTipo::where('codigo', 'OIRS')->first();
+        $oirsTipoId = $oirsTipo?->id;
+
+        return view('vecino.dashboard', compact('stats', 'charts', 'mis_solicitudes', 'oirsTipoId'));
+    }
+
+    /**
+     * Arma datos del dashboard estilo OIRS Digital.
+     *
+     * @return array{0: array<string,mixed>, 1: array<string,mixed>, 2: \Illuminate\Support\Collection}
+     */
+    private function buildOirsDashboardData(bool $soloPendientes = false): array
+    {
+        $oirsTipoId = SolicitudTipo::where('codigo', 'OIRS')->value('id');
+
+        $base = Solicitud::query()
+            ->when($oirsTipoId, fn ($q) => $q->where('tipo_id', $oirsTipoId));
+
+        if ($soloPendientes) {
+            $base = $base->whereIn('estado', ['enviada', 'en_revision_op', 'derivada', 'en_gestion']);
+        }
+
+        $total = (clone $base)->count();
+        $pendientes = (clone $base)->whereIn('estado', ['enviada', 'en_revision_op', 'derivada', 'en_gestion'])->count();
+        $resueltas = (clone $base)->whereIn('estado', ['respondida', 'rechazada'])->count();
+
+        $avgDays = (clone $base)
+            ->whereNotNull('fecha_respuesta')
+            ->select(DB::raw('AVG(TIMESTAMPDIFF(HOUR, created_at, fecha_respuesta)) as avg_hours'))
+            ->value('avg_hours');
+        $avgDays = $avgDays ? round(((float) $avgDays) / 24, 1) : null;
+
+        // Últimos 6 meses: total y por tipo_oirs (informacion/reclamo/sugerencia)
+        $labels = [];
+        $serieTotal = [];
+        $serieInfo = [];
+        $serieReclamo = [];
+        $serieSugerencia = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $fecha = now()->subMonths($i);
+            $labels[] = $fecha->translatedFormat('M');
+
+            $mesBase = (clone $base)->whereYear('created_at', $fecha->year)->whereMonth('created_at', $fecha->month);
+            $serieTotal[] = (clone $mesBase)->count();
+
+            $serieInfo[] = (clone $mesBase)->where('datos_json->tipo_oirs', 'informacion')->count();
+            $serieReclamo[] = (clone $mesBase)->where('datos_json->tipo_oirs', 'reclamo')->count();
+            $serieSugerencia[] = (clone $mesBase)->where('datos_json->tipo_oirs', 'sugerencia')->count();
+        }
+
+        $porTipo = (clone $base)
+            ->selectRaw("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(datos_json, '$.tipo_oirs')), 'otros') as tipo_oirs, COUNT(*) as total")
+            ->groupBy('tipo_oirs')
+            ->orderByDesc('total')
+            ->get()
+            ->mapWithKeys(fn ($row) => [(string) $row->tipo_oirs => (int) $row->total])
+            ->all();
+
+        $porEstado = (clone $base)
+            ->select('estado', DB::raw('COUNT(*) as total'))
+            ->groupBy('estado')
+            ->orderByDesc('total')
+            ->get()
+            ->mapWithKeys(fn ($row) => [(string) $row->estado => (int) $row->total])
+            ->all();
+
+        $oirsStats = [
+            'total' => $total,
+            'pendientes' => $pendientes,
+            'resueltas' => $resueltas,
+            'tiempo_promedio_dias' => $avgDays,
+        ];
+
+        $oirsCharts = [
+            'labels' => $labels,
+            'serie_total' => $serieTotal,
+            'serie_informacion' => $serieInfo,
+            'serie_reclamo' => $serieReclamo,
+            'serie_sugerencia' => $serieSugerencia,
+            'por_tipo' => $porTipo,
+            'por_estado' => $porEstado,
+        ];
+
+        $oirsUltimas = (clone $base)
+            ->with(['vecino', 'tipo'])
+            ->orderBy('created_at', 'desc')
+            ->limit(8)
+            ->get();
+
+        return [$oirsStats, $oirsCharts, $oirsUltimas];
     }
 }

@@ -12,6 +12,56 @@
             <p class="mt-1 text-sm text-slate-600">Vista general del sistema y gestión de solicitudes</p>
         </div>
 
+        <!-- Resumen estilo OIRS Digital -->
+        <div class="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-6 py-4">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">OIRS Digital · Resumen</h2>
+                        <p class="mt-1 text-sm text-slate-600">Totales, tendencia y distribución</p>
+                    </div>
+                    <div class="text-xs text-slate-500">{{ now()->translatedFormat('l, d \\d\\e F \\d\\e Y') }}</div>
+                </div>
+            </div>
+
+            <div class="px-6 py-5">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total OIRS</p>
+                        <p class="mt-2 text-3xl font-bold text-slate-900">{{ number_format($oirsStats['total'] ?? 0) }}</p>
+                    </div>
+                    <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-amber-800">Pendientes</p>
+                        <p class="mt-2 text-3xl font-bold text-amber-900">{{ number_format($oirsStats['pendientes'] ?? 0) }}</p>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-emerald-800">Resueltas</p>
+                        <p class="mt-2 text-3xl font-bold text-emerald-900">{{ number_format($oirsStats['resueltas'] ?? 0) }}</p>
+                    </div>
+                    <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-blue-800">Tiempo promedio</p>
+                        <p class="mt-2 text-3xl font-bold text-blue-900">
+                            {{ $oirsStats['tiempo_promedio_dias'] !== null ? $oirsStats['tiempo_promedio_dias'] : '—' }}
+                            <span class="text-base font-semibold">días</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
+                    <div class="lg:col-span-8">
+                        <div class="h-72">
+                            <canvas id="chartTendencia"></canvas>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-4">
+                        <div class="h-72">
+                            <canvas id="chartTipos"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Stats Grid -->
         <div class="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <!-- Total Solicitudes -->
@@ -208,4 +258,69 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(() => {
+    const charts = @json($oirsCharts ?? []);
+
+    const labels = charts.labels || [];
+    const ctxLine = document.getElementById('chartTendencia');
+    if (ctxLine) {
+        new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    { label: 'Total', data: charts.serie_total || [], borderColor: '#0ea5e9', backgroundColor: 'rgba(14,165,233,.12)', tension: 0.35, fill: true, pointRadius: 3 },
+                    { label: 'Información', data: charts.serie_informacion || [], borderColor: '#10b981', tension: 0.35, fill: false, pointRadius: 2 },
+                    { label: 'Reclamo', data: charts.serie_reclamo || [], borderColor: '#f97316', tension: 0.35, fill: false, pointRadius: 2 },
+                    { label: 'Sugerencia', data: charts.serie_sugerencia || [], borderColor: '#8b5cf6', tension: 0.35, fill: false, pointRadius: 2 },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    const tipoMap = charts.por_tipo || {};
+    const tipoLabels = Object.keys(tipoMap).map(k => ({
+        informacion: 'Información',
+        reclamo: 'Reclamo',
+        sugerencia: 'Sugerencia',
+        otros: 'Otros',
+    }[k] || (k.charAt(0).toUpperCase() + k.slice(1))));
+    const tipoData = Object.values(tipoMap);
+
+    const ctxDonut = document.getElementById('chartTipos');
+    if (ctxDonut) {
+        new Chart(ctxDonut, {
+            type: 'doughnut',
+            data: {
+                labels: tipoLabels,
+                datasets: [{
+                    data: tipoData,
+                    backgroundColor: ['#0ea5e9', '#10b981', '#f97316', '#94a3b8', '#8b5cf6'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                cutout: '62%'
+            }
+        });
+    }
+})();
+</script>
+@endpush
 @endsection

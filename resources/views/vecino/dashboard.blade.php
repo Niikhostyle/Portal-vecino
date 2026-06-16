@@ -1,276 +1,267 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Vecino')
-@section('header_title', 'Dashboard')
+@section('title', 'OIRS Digital')
+@section('header_title', 'OIRS Digital')
 
-@push('styles')
-<style>
-/* Forzar visibilidad del botón Ver en tabla de solicitudes */
-a.btn-ver-solicitud {
-    display: inline-flex !important;
-    align-items: center !important;
-    background-color: #2563eb !important;
-    color: #ffffff !important;
-    border: 1px solid #2563eb !important;
-    text-decoration: none !important;
-}
-a.btn-ver-solicitud:hover {
-    background-color: #1d4ed8 !important;
-    border-color: #1d4ed8 !important;
-    color: #ffffff !important;
-}
-a.btn-ver-solicitud span,
-a.btn-ver-solicitud svg {
-    color: #ffffff !important;
-}
-a.btn-ver-solicitud svg {
-    stroke: #ffffff !important;
-}
-</style>
-@endpush
+@php
+    $nombreCompleto = trim(auth()->user()->name ?? '');
+    $primerNombre = $nombreCompleto !== '' ? explode(' ', $nombreCompleto)[0] : 'Vecino';
+
+    $categorias = [
+        [
+            'key' => 'felicitacion',
+            'titulo' => 'Felicitaciones',
+            'desc' => 'Reconoce un buen servicio o atención recibida.',
+            'icon' => 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z',
+            'c1' => '#fbbf24', 'c2' => '#f97316',
+            'icobg' => '#fffbeb', 'icofg' => '#d97706',
+            'ring' => 'hover:border-amber-300',
+        ],
+        [
+            'key' => 'reclamo',
+            'titulo' => 'Reclamos',
+            'desc' => 'Reporta un problema o una mala experiencia.',
+            'icon' => 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
+            'c1' => '#fb7185', 'c2' => '#ef4444',
+            'icobg' => '#fff1f2', 'icofg' => '#e11d48',
+            'ring' => 'hover:border-rose-300',
+        ],
+        [
+            'key' => 'informacion',
+            'titulo' => 'Información',
+            'desc' => 'Solicita información sobre trámites o servicios.',
+            'icon' => 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+            'c1' => '#38bdf8', 'c2' => '#2563eb',
+            'icobg' => '#f0f9ff', 'icofg' => '#0284c7',
+            'ring' => 'hover:border-sky-300',
+        ],
+        [
+            'key' => 'sugerencia',
+            'titulo' => 'Sugerencias',
+            'desc' => 'Propón una idea para mejorar la municipalidad.',
+            'icon' => 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
+            'c1' => '#a78bfa', 'c2' => '#7c3aed',
+            'icobg' => '#f5f3ff', 'icofg' => '#7c3aed',
+            'ring' => 'hover:border-violet-300',
+        ],
+    ];
+
+    $linkBase = $oirsTipoId
+        ? route('vecino.iniciar-solicitud', $oirsTipoId)
+        : route('vecino.solicitudes');
+@endphp
 
 @section('content')
-<div class="min-h-screen bg-white">
-    <div class="mx-auto max-w-7xl px-4 pt-6 pb-8 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p class="text-sm text-slate-600">Resumen de tu actividad y solicitudes</p>
-            <a href="{{ route('vecino.solicitudes') }}" class="inline-flex shrink-0 items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Crear solicitud
-            </a>
-        </div>
+<div class="min-h-screen bg-slate-50">
+    <div class="mx-auto max-w-6xl px-4 pt-6 pb-10 sm:px-6 lg:px-8">
 
-        <!-- Tarjetas de métricas -->
-        <div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium uppercase tracking-wider text-slate-500">Total</p>
-                        <p class="mt-1 text-2xl font-bold text-slate-900">{{ $stats['total'] }}</p>
-                        <p class="mt-0.5 text-xs text-slate-600">solicitudes</p>
-                    </div>
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100">
-                        <svg class="h-6 w-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium uppercase tracking-wider text-slate-500">Pendientes</p>
-                        <p class="mt-1 text-2xl font-bold text-amber-600">{{ $stats['pendientes'] }}</p>
-                        <p class="mt-0.5 text-xs text-slate-600">en trámite</p>
-                    </div>
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50">
-                        <svg class="h-6 w-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium uppercase tracking-wider text-slate-500">Respondidas</p>
-                        <p class="mt-1 text-2xl font-bold text-emerald-600">{{ $stats['respondida'] }}</p>
-                        <p class="mt-0.5 text-xs text-slate-600">resueltas</p>
-                    </div>
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50">
-                        <svg class="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium uppercase tracking-wider text-slate-500">Rechazadas</p>
-                        <p class="mt-1 text-2xl font-bold text-rose-600">{{ $stats['rechazada'] }}</p>
-                        <p class="mt-0.5 text-xs text-slate-600">no aprobadas</p>
-                    </div>
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50">
-                        <svg class="h-6 w-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {{-- HERO / Bienvenida --}}
+        <div class="relative overflow-hidden rounded-2xl px-6 py-8 shadow-lg sm:px-10 sm:py-10"
+             style="background-image: linear-gradient(135deg, #1d4ed8 0%, #2563eb 45%, #4f46e5 100%);">
+            <div class="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full" style="background-color: rgba(255,255,255,.1);"></div>
+            <div class="pointer-events-none absolute -bottom-16 -left-10 h-52 w-52 rounded-full" style="background-color: rgba(255,255,255,.06);"></div>
 
-        <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <!-- Gráfico: Solicitudes por estado -->
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm lg:col-span-2">
-                <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
-                    <h2 class="text-lg font-semibold text-slate-900">Solicitudes por estado</h2>
-                    <p class="mt-0.5 text-sm text-slate-600">Distribución de tus solicitudes</p>
-                </div>
-                <div class="p-6">
-                    @php
-                        $estadosChart = [
-                            ['label' => 'Enviada', 'count' => $stats['enviada'], 'color' => 'bg-amber-400'],
-                            ['label' => 'En revisión', 'count' => $stats['en_revision_op'], 'color' => 'bg-blue-400'],
-                            ['label' => 'Derivada / En gestión', 'count' => $stats['derivada'] + $stats['en_gestion'], 'color' => 'bg-slate-400'],
-                            ['label' => 'Respondida', 'count' => $stats['respondida'], 'color' => 'bg-emerald-500'],
-                            ['label' => 'Rechazada', 'count' => $stats['rechazada'], 'color' => 'bg-rose-400'],
-                        ];
-                        $maxCount = max(1, $stats['total']);
-                    @endphp
-                    <div class="space-y-4">
-                        @foreach($estadosChart as $item)
-                            <div>
-                                <div class="mb-1.5 flex justify-between text-sm">
-                                    <span class="font-medium text-slate-700">{{ $item['label'] }}</span>
-                                    <span class="text-slate-600">{{ $item['count'] }}</span>
-                                </div>
-                                <div class="h-3 w-full overflow-hidden rounded-full bg-slate-100">
-                                    <div class="h-full {{ $item['color'] }} rounded-full transition-all duration-500" style="width: {{ $maxCount > 0 ? round(($item['count'] / $maxCount) * 100) : 0 }}%"></div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                    @if($stats['total'] === 0)
-                        <p class="mt-4 text-center text-sm text-slate-500">Aún no tienes solicitudes. <a href="{{ route('vecino.solicitudes') }}" class="font-medium text-slate-900 underline hover:no-underline">Crear primera solicitud</a></p>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Gráfico: Últimos 6 meses -->
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
-                    <h2 class="text-lg font-semibold text-slate-900">Actividad reciente</h2>
-                    <p class="mt-0.5 text-sm text-slate-600">Solicitudes por mes</p>
-                </div>
-                <div class="p-6">
-                    @php
-                        $maxMeses = max(1, collect($meses)->max('total'));
-                    @endphp
-                    <div class="flex items-end justify-between gap-2" style="height: 140px;">
-                        @foreach($meses as $m)
-                            <div class="flex flex-1 flex-col items-center gap-1.5 h-full">
-                                <span class="text-xs font-medium text-slate-600">{{ $m['total'] }}</span>
-                                <div class="w-full flex-1 min-h-[8px] overflow-hidden rounded-t bg-slate-100 flex flex-col justify-end" title="{{ $m['label'] }}: {{ $m['total'] }}">
-                                    <div class="w-full rounded-t bg-slate-900 transition-all duration-500" style="height: {{ $maxMeses > 0 ? max(8, round(($m['total'] / $maxMeses) * 100)) : 8 }}%;"></div>
-                                </div>
-                                <span class="text-[10px] text-slate-500">{{ $m['label'] }}</span>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mis solicitudes recientes -->
-        <div class="mt-10 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div class="flex flex-col gap-4 border-b border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 class="text-lg font-semibold text-slate-900">Mis solicitudes recientes</h2>
-                    <p class="mt-0.5 text-sm text-slate-600">Últimas solicitudes que has creado</p>
-                </div>
-                <a href="{{ route('vecino.mis-solicitudes') }}" class="inline-flex shrink-0 items-center text-sm font-medium text-slate-700 transition-colors hover:text-slate-900">
-                    Ver todas
-                    <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            <div class="relative">
+                <div class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider"
+                     style="background-color: rgba(255,255,255,.18); color: #ffffff;">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 3v-3z"></path>
                     </svg>
+                    OIRS Digital · Municipalidad de Chanco
+                </div>
+
+                <h1 class="mt-4 text-2xl font-bold sm:text-3xl" style="color: #ffffff;">
+                    Bienvenido, {{ $primerNombre }}
+                </h1>
+                <p class="mt-2 max-w-2xl text-sm leading-relaxed sm:text-base" style="color: #dbeafe;">
+                    Oficina de Informaciones, Reclamos y Sugerencias. Aquí puedes enviar tu solicitud
+                    y dar seguimiento a tus trámites con la municipalidad. Selecciona una categoría para comenzar.
+                </p>
+            </div>
+        </div>
+
+        {{-- CAJAS OIRS (izquierda) + RESUMEN VERTICAL (derecha) --}}
+        <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+            {{-- 4 cajas OIRS en cuadrícula 2x2 --}}
+            <div class="lg:col-span-2">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">¿Qué deseas realizar hoy?</h2>
+                <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    @foreach($categorias as $cat)
+                        <a href="{{ $linkBase }}?tipo_oirs={{ $cat['key'] }}"
+                           class="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md {{ $cat['ring'] }}">
+                            <div class="mb-1 h-1.5 w-12 rounded-full" style="background-image: linear-gradient(90deg, {{ $cat['c1'] }}, {{ $cat['c2'] }});"></div>
+                            <div class="mt-3 inline-flex h-12 w-12 items-center justify-center rounded-xl"
+                                 style="background-color: {{ $cat['icobg'] }}; color: {{ $cat['icofg'] }};">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $cat['icon'] }}"></path>
+                                </svg>
+                            </div>
+                            <h3 class="mt-4 text-base font-bold text-slate-900">{{ $cat['titulo'] }}</h3>
+                            <p class="mt-1 flex-1 text-sm leading-snug text-slate-500">{{ $cat['desc'] }}</p>
+                            <span class="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 group-hover:text-blue-700">
+                                Comenzar
+                                <svg class="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                </svg>
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- KPIs en columna vertical --}}
+            <div class="lg:col-span-1">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500">Mi resumen</h2>
+                <div class="mt-3 flex flex-col gap-4">
+                    <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Total</p>
+                            <p class="mt-1 text-2xl font-bold text-slate-900">{{ $stats['total'] }}</p>
+                        </div>
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg" style="background-color: #f1f5f9; color: #475569;">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-xl border border-amber-200 p-5 shadow-sm" style="background-color: #fffbeb;">
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-wider" style="color: #92400e;">En trámite</p>
+                            <p class="mt-1 text-2xl font-bold" style="color: #78350f;">{{ $stats['pendientes'] }}</p>
+                        </div>
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg" style="background-color: #fef3c7; color: #d97706;">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-xl border border-emerald-200 p-5 shadow-sm" style="background-color: #ecfdf5;">
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-wider" style="color: #065f46;">Resueltas</p>
+                            <p class="mt-1 text-2xl font-bold" style="color: #064e3b;">{{ $stats['respondida'] }}</p>
+                        </div>
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg" style="background-color: #d1fae5; color: #059669;">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- GRÁFICOS --}}
+        <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-5">
+            <div class="lg:col-span-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <p class="text-sm font-semibold text-slate-900">Mi actividad (6 meses)</p>
+                <div class="mt-3 h-44">
+                    <canvas id="chartActividad"></canvas>
+                </div>
+            </div>
+            <div class="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <p class="text-sm font-semibold text-slate-900">Por estado</p>
+                <div class="mt-3 h-44">
+                    <canvas id="chartEstado"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {{-- ÚLTIMAS SOLICITUDES --}}
+        <div class="mt-5 rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 sm:px-5">
+                <p class="text-sm font-semibold text-slate-900">Mis últimas solicitudes</p>
+                <a href="{{ route('vecino.mis-solicitudes') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-700">
+                    Ver todas →
                 </a>
             </div>
+
             @if($mis_solicitudes->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="border-b border-slate-200 bg-slate-50/50">
-                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Trámite</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Folio</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Fecha</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">Estado</th>
-                                <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200">
-                            @foreach($mis_solicitudes as $solicitud)
-                                <tr class="transition-colors hover:bg-slate-50/50">
-                                    <td class="px-6 py-4">
-                                        <p class="text-sm font-medium text-slate-900">{{ $solicitud->tipo->titulo }}</p>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <code class="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-800">{{ $solicitud->folio }}</code>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-slate-600">{{ $solicitud->created_at->format('d/m/Y') }}</td>
-                                    <td class="px-6 py-4">
-                                        @if($solicitud->estado === 'respondida')
-                                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">Respondida</span>
-                                        @elseif($solicitud->estado === 'rechazada')
-                                            <span class="inline-flex items-center rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-medium text-rose-800">Rechazada</span>
-                                        @else
-                                            <span class="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">{{ ucfirst(str_replace('_', ' ', $solicitud->estado)) }}</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center justify-end">
-                                            <a href="{{ route('vecino.solicitud.show', $solicitud->id) }}" class="btn-ver-solicitud inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors shrink-0">
-                                                <svg class="mr-1.5 h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                                </svg>
-                                                <span>Ver</span>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                <div class="divide-y divide-slate-100">
+                    @foreach($mis_solicitudes as $solicitud)
+                        @php
+                            $estadoBadge = match($solicitud->estado) {
+                                'respondida' => ['bg-emerald-100', 'text-emerald-800', 'Resuelta'],
+                                'rechazada' => ['bg-rose-100', 'text-rose-800', 'Rechazada'],
+                                default => ['bg-amber-100', 'text-amber-800', 'En trámite'],
+                            };
+                            $titulo = optional($solicitud->tipo)->codigo === 'OIRS'
+                                ? 'OIRS · ' . \Illuminate\Support\Str::ucfirst($solicitud->datos_json['tipo_oirs'] ?? 'Solicitud')
+                                : \Illuminate\Support\Str::limit(optional($solicitud->tipo)->titulo, 28);
+                        @endphp
+                        <div class="flex items-center gap-3 px-4 py-3 sm:px-5 hover:bg-slate-50/60">
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-medium text-slate-900">{{ $titulo }}</p>
+                                <p class="text-xs text-slate-500">{{ $solicitud->folio }} · {{ $solicitud->created_at->format('d/m/Y') }}</p>
+                            </div>
+                            <span class="hidden shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold sm:inline-flex {{ $estadoBadge[0] }} {{ $estadoBadge[1] }}">
+                                {{ $estadoBadge[2] }}
+                            </span>
+                            <a href="{{ route('vecino.solicitud.show', $solicitud->id) }}"
+                               class="shrink-0 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800">
+                                Ver
+                            </a>
+                        </div>
+                    @endforeach
                 </div>
             @else
-                <div class="flex flex-col items-center justify-center px-6 py-16 text-center">
-                    <div class="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
-                        <svg class="h-7 w-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                    </div>
-                    <p class="mt-4 text-sm font-medium text-slate-900">Aún no tienes solicitudes</p>
-                    <p class="mt-1 text-sm text-slate-600">Crea tu primera solicitud y aparecerá aquí.</p>
-                    <a href="{{ route('vecino.solicitudes') }}" class="mt-6 inline-flex items-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700">Crear solicitud</a>
+                <div class="px-4 py-10 text-center sm:px-5">
+                    <p class="text-sm text-slate-600">Aún no tienes solicitudes. Elige una categoría arriba para comenzar.</p>
                 </div>
             @endif
         </div>
-
-        <!-- Accesos rápidos -->
-        <div class="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <a href="{{ route('vecino.solicitudes') }}" class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-slate-300 hover:shadow-md">
-                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-slate-900">Crear solicitud</h3>
-                    <p class="mt-0.5 text-sm text-slate-600">Inicia un nuevo trámite municipal</p>
-                </div>
-                <svg class="ml-auto h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </a>
-            <a href="{{ route('vecino.mis-solicitudes') }}" class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-slate-300 hover:shadow-md">
-                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-                    <svg class="h-6 w-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-slate-900">Mis solicitudes</h3>
-                    <p class="mt-0.5 text-sm text-slate-600">Ver historial y estado de tus trámites</p>
-                </div>
-                <svg class="ml-auto h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </a>
-        </div>
     </div>
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(() => {
+    const charts = @json($charts ?? []);
+
+    const ctxAct = document.getElementById('chartActividad');
+    if (ctxAct) {
+        new Chart(ctxAct, {
+            type: 'line',
+            data: {
+                labels: charts.labels || [],
+                datasets: [{
+                    label: 'Solicitudes',
+                    data: charts.serie_total || [],
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37,99,235,.1)',
+                    tension: 0.35,
+                    fill: true,
+                    pointRadius: 3,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    const est = charts.por_estado || {};
+    const ctxEst = document.getElementById('chartEstado');
+    if (ctxEst) {
+        new Chart(ctxEst, {
+            type: 'doughnut',
+            data: {
+                labels: ['En trámite', 'Resueltas', 'Rechazadas'],
+                datasets: [{
+                    data: [est.pendientes || 0, est.respondidas || 0, est.rechazadas || 0],
+                    backgroundColor: ['#f59e0b', '#10b981', '#f43f5e'],
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
+                cutout: '58%',
+            }
+        });
+    }
+})();
+</script>
+@endpush
 @endsection

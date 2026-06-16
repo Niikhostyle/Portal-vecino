@@ -64,7 +64,7 @@ class SolicitudTipo extends Model
     {
         if ($this->esOirs()) {
             return [
-                'datos.tipo_oirs' => 'required|in:informacion,reclamo,sugerencia',
+                'datos.tipo_oirs' => 'required|in:felicitacion,informacion,reclamo,sugerencia',
                 'datos.asunto' => 'required|string|min:5|max:255',
                 'datos.detalle' => 'required|string|min:20',
             ];

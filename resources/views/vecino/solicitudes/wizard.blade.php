@@ -164,11 +164,13 @@
                 @if($esOirs)
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Tipo de solicitud OIRS <span class="text-red-500">*</span></label>
+                        @php $tipoOirsSel = request('tipo_oirs'); @endphp
                         <select name="datos[tipo_oirs]" required class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                             <option value="">Seleccione...</option>
-                            <option value="informacion">Solicitud de Información</option>
-                            <option value="reclamo">Reclamo</option>
-                            <option value="sugerencia">Sugerencia</option>
+                            <option value="felicitacion" @selected($tipoOirsSel === 'felicitacion')>Felicitación</option>
+                            <option value="informacion" @selected($tipoOirsSel === 'informacion')>Solicitud de Información</option>
+                            <option value="reclamo" @selected($tipoOirsSel === 'reclamo')>Reclamo</option>
+                            <option value="sugerencia" @selected($tipoOirsSel === 'sugerencia')>Sugerencia</option>
                         </select>
                     </div>
                     <div>
