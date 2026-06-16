@@ -89,6 +89,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/catalogo/{id}', [AdminController::class, 'eliminarTipo'])->name('catalogo.destroy');
         
         Route::get('/reportes', [AdminController::class, 'reportes'])->name('reportes');
+
+        Route::get('/configuracion', [AdminController::class, 'configuracion'])->name('configuracion');
+        Route::put('/configuracion', [AdminController::class, 'updateConfiguracion'])->name('configuracion.update');
     });
 
     // Rutas Recintos (accesible para todos los roles autenticados)

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\SolicitudTipo;
 use App\Models\Solicitud;
 use App\Models\Recinto;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
@@ -244,5 +245,23 @@ class AdminController extends Controller
         ];
 
         return view('admin.reportes', compact('stats'));
+    }
+
+    // Configuración general del sistema
+    public function configuracion()
+    {
+        $config = [
+            'recintos_enabled' => Setting::enabled('recintos_enabled'),
+        ];
+
+        return view('admin.configuracion', compact('config'));
+    }
+
+    public function updateConfiguracion(Request $request)
+    {
+        Setting::set('recintos_enabled', $request->boolean('recintos_enabled') ? '1' : '0');
+
+        return redirect()->route('admin.configuracion')
+            ->with('success', 'Configuración actualizada correctamente.');
     }
 }
