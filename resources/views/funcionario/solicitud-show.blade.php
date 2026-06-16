@@ -174,7 +174,7 @@
                             @csrf
                             <div>
                                 <label class="mb-2 block text-sm font-medium text-slate-700">Respuesta</label>
-                                <textarea name="respuesta" rows="5" required minlength="10" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0 transition-colors resize-none"></textarea>
+                                <textarea name="respuesta" rows="5" required class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0 transition-colors resize-none"></textarea>
                             </div>
                             <div>
                                 <label class="mb-2 block text-sm font-medium text-slate-700">Adjuntar Documentos (opcional)</label>
@@ -202,7 +202,7 @@
                             @csrf
                             <div class="mb-4">
                                 <label class="mb-2 block text-sm font-medium text-slate-700">Motivo del Rechazo</label>
-                                <textarea name="motivo" rows="3" required minlength="10" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-0 transition-colors resize-none" placeholder="Indique el motivo del rechazo (mín. 10 caracteres)"></textarea>
+                                <textarea name="motivo" rows="3" required class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-0 transition-colors resize-none" placeholder="Indique el motivo del rechazo"></textarea>
                             </div>
                             <button type="submit" class="w-full rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2">
                                 <span class="flex items-center justify-center">

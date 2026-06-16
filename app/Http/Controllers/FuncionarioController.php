@@ -75,7 +75,7 @@ class FuncionarioController extends Controller
     public function rechazar(Request $request, $id)
     {
         $request->validate([
-            'motivo' => 'required|string|min:10|max:1000',
+            'motivo' => 'required|string|max:1000',
         ]);
 
         $solicitud = Solicitud::where('asignado_user_id', auth()->id())->findOrFail($id);
@@ -110,7 +110,7 @@ class FuncionarioController extends Controller
     public function responder(Request $request, $id)
     {
         $request->validate([
-            'respuesta' => 'required|string|min:10',
+            'respuesta' => 'required|string',
             // Solo permitir PDF y JPG/JPEG
             'adjuntos.*' => 'file|mimes:pdf,jpg,jpeg|max:5120',
         ]);

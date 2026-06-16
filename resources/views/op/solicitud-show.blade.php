@@ -293,7 +293,7 @@
                                     @csrf
                                     <div>
                                         <label class="mb-1.5 block text-sm font-medium text-slate-700">Respuesta al vecino</label>
-                                        <textarea name="respuesta" rows="6" required minlength="10"
+                                        <textarea name="respuesta" rows="6" required
                                                   placeholder="Redacte la respuesta oficial..."
                                                   class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none"></textarea>
                                     </div>
@@ -354,7 +354,7 @@
                                     @csrf
                                     <div>
                                         <label class="mb-1.5 block text-sm font-medium text-slate-700">Motivo del rechazo</label>
-                                        <textarea name="motivo" rows="5" required minlength="10"
+                                        <textarea name="motivo" rows="5" required
                                                   placeholder="Indique el motivo del rechazo..."
                                                   class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 resize-none"></textarea>
                                     </div>

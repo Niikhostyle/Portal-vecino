@@ -88,7 +88,7 @@ class OficinaPartesController extends Controller
     public function rechazar(Request $request, $id)
     {
         $request->validate([
-            'motivo' => 'required|string|min:10|max:1000',
+            'motivo' => 'required|string|max:1000',
         ]);
 
         DB::beginTransaction();
@@ -121,7 +121,7 @@ class OficinaPartesController extends Controller
     public function responder(Request $request, $id)
     {
         $request->validate([
-            'respuesta' => 'required|string|min:10',
+            'respuesta' => 'required|string',
             'adjuntos.*' => 'file|mimes:pdf,jpg,jpeg|max:5120',
         ]);
 
