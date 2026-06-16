@@ -5,7 +5,16 @@
 
 @php
     $nombreCompleto = trim(auth()->user()->name ?? '');
-    $primerNombre = $nombreCompleto !== '' ? explode(' ', $nombreCompleto)[0] : 'Vecino';
+    $partesNombre = preg_split('/\s+/', $nombreCompleto, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+    $cantidadPartes = count($partesNombre);
+    if ($cantidadPartes >= 3) {
+        // nombres + apellidos: primer nombre + primer apellido (antepenúltima palabra)
+        $saludoNombre = $partesNombre[0] . ' ' . $partesNombre[$cantidadPartes - 2];
+    } elseif ($cantidadPartes === 2) {
+        $saludoNombre = $partesNombre[0] . ' ' . $partesNombre[1];
+    } else {
+        $saludoNombre = $partesNombre[0] ?? 'Vecino';
+    }
 
     $categorias = [
         [
@@ -71,7 +80,7 @@
                 </div>
 
                 <h1 class="mt-4 text-2xl font-bold sm:text-3xl" style="color: #ffffff;">
-                    Bienvenido, {{ $primerNombre }}
+                    Bienvenido, {{ $saludoNombre }}
                 </h1>
                 <p class="mt-2 max-w-2xl text-sm leading-relaxed sm:text-base" style="color: #dbeafe;">
                     Oficina de Informaciones, Reclamos y Sugerencias. Aquí puedes enviar tu solicitud

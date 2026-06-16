@@ -73,19 +73,6 @@
              @click.away="mobileMenuOpen = false"
              class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-slate-200 shadow-xl pt-14">
             <div class="flex flex-col h-full">
-                <!-- User info -->
-                <div class="px-6 py-4 border-b border-slate-200">
-                    <div class="flex items-center space-x-3">
-                        <div class="h-10 w-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-medium text-sm">
-                            {{ substr(auth()->user()->name, 0, 1) }}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-slate-900 truncate">{{ auth()->user()->name }}</p>
-                            <p class="text-xs text-slate-500">{{ ucfirst(str_replace('_', ' ', auth()->user()->rol)) }}</p>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Navigation -->
                 <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
                     @if(auth()->user()->isVecino())
@@ -209,8 +196,17 @@
                     </a>
                 </nav>
 
-                <!-- Logout -->
-                <div class="px-4 py-4 border-t border-neutral-200/80">
+                <!-- Usuario + Logout -->
+                <div class="border-t border-neutral-200/80 px-4 py-4">
+                    <div class="mb-2 flex items-center space-x-3 px-2">
+                        <div class="h-10 w-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-medium text-sm">
+                            {{ substr(auth()->user()->name, 0, 1) }}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-slate-900 truncate">{{ auth()->user()->name }}</p>
+                            <p class="text-xs text-slate-500">{{ ucfirst(str_replace('_', ' ', auth()->user()->rol)) }}</p>
+                        </div>
+                    </div>
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit" class="flex w-full items-center px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 transition-colors">
@@ -240,19 +236,6 @@
                     </div>
                     <span class="text-lg font-semibold text-slate-900">Portal Ciudadano</span>
                 </a>
-            </div>
-
-            <!-- User info -->
-            <div class="px-6 py-4 border-b border-slate-200">
-                <div class="flex items-center space-x-3">
-                    <div class="h-10 w-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-medium text-sm">
-                        {{ substr(auth()->user()->name, 0, 1) }}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-slate-900 truncate">{{ auth()->user()->name }}</p>
-                        <p class="text-xs text-slate-500">{{ ucfirst(str_replace('_', ' ', auth()->user()->rol)) }}</p>
-                    </div>
-                </div>
             </div>
 
             <!-- Navigation -->
@@ -378,11 +361,20 @@
                 </a>
             </nav>
 
-            <!-- Logout -->
-                <div class="px-4 py-4 border-t border-slate-200">
+            <!-- Usuario + Logout -->
+            <div class="border-t border-slate-200 px-4 py-4">
+                <div class="mb-2 flex items-center space-x-3 px-2">
+                    <div class="h-10 w-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-medium text-sm">
+                        {{ substr(auth()->user()->name, 0, 1) }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-slate-900 truncate">{{ auth()->user()->name }}</p>
+                        <p class="text-xs text-slate-500">{{ ucfirst(str_replace('_', ' ', auth()->user()->rol)) }}</p>
+                    </div>
+                </div>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
-                        <button type="submit" class="flex w-full items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+                    <button type="submit" class="flex w-full items-center px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                         </svg>
