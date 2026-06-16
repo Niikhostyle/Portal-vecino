@@ -65,8 +65,8 @@ class SolicitudTipo extends Model
         if ($this->esOirs()) {
             return [
                 'datos.tipo_oirs' => 'required|in:felicitacion,informacion,reclamo,sugerencia',
-                'datos.asunto' => 'required|string|min:5|max:255',
-                'datos.detalle' => 'required|string|min:20',
+                'datos.asunto' => 'required|string|max:255',
+                'datos.detalle' => 'required|string',
             ];
         }
 
@@ -81,10 +81,8 @@ class SolicitudTipo extends Model
                 'datos.tipo_oirs.required' => 'Seleccione el tipo de solicitud OIRS.',
                 'datos.tipo_oirs.in' => 'El tipo de solicitud OIRS no es válido.',
                 'datos.asunto.required' => 'El asunto es obligatorio.',
-                'datos.asunto.min' => 'El asunto debe tener al menos 5 caracteres.',
                 'datos.asunto.max' => 'El asunto no puede superar 255 caracteres.',
                 'datos.detalle.required' => 'El detalle de la solicitud es obligatorio.',
-                'datos.detalle.min' => 'El detalle debe tener al menos 20 caracteres. Describa su solicitud con mayor detalle.',
             ];
         }
 

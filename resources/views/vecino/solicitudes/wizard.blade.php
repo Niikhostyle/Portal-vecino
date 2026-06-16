@@ -175,12 +175,12 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Asunto <span class="text-red-500">*</span></label>
-                        <input type="text" name="datos[asunto]" required minlength="5" maxlength="255" placeholder="Resumen breve de su solicitud (mín. 5 caracteres)"
+                        <input type="text" name="datos[asunto]" required maxlength="255" placeholder="Resumen breve de su solicitud"
                                class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 bg-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Detalle de su solicitud <span class="text-red-500">*</span></label>
-                        <textarea name="datos[detalle]" rows="6" required minlength="20" placeholder="Describa con el mayor detalle posible su información, reclamo o sugerencia..."
+                        <textarea name="datos[detalle]" rows="6" required placeholder="Describa con el mayor detalle posible su información, reclamo o sugerencia..."
                                   class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 bg-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
                     </div>
                     <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
