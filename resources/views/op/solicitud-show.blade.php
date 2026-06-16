@@ -56,6 +56,22 @@
                                 </dl>
                             </div>
                         @endif
+
+                        @if($solicitud->respuesta)
+                            <div class="mt-6 border-t border-slate-200 pt-6">
+                                <h3 class="mb-4 text-sm font-semibold text-emerald-900">Respuesta al vecino</h3>
+                                <dl class="grid grid-cols-1 gap-x-4 gap-y-3">
+                                    <div>
+                                        <dt class="text-sm font-medium text-slate-600">Respuesta</dt>
+                                        <dd class="mt-1 whitespace-pre-wrap rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-slate-900">{{ $solicitud->respuesta }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-slate-600">Fecha de respuesta</dt>
+                                        <dd class="mt-1 text-sm text-slate-900">{{ $solicitud->fecha_respuesta ? $solicitud->fecha_respuesta->format('d/m/Y H:i') : '-' }}</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -88,6 +104,52 @@
 
             <!-- Panel de Acciones -->
             <div class="space-y-6">
+                @if(in_array($solicitud->estado, ['respondida', 'rechazada']))
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+                    <div class="border-b border-slate-200 bg-slate-100 px-6 py-4">
+                        <h2 class="text-sm font-semibold text-slate-700">Solicitud cerrada</h2>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-sm text-slate-600">
+                            Esta solicitud ya está <strong>{{ $solicitud->estado === 'respondida' ? 'respondida' : 'rechazada' }}</strong>.
+                            No se pueden realizar más acciones.
+                        </p>
+                        @if($solicitud->estado === 'rechazada' && $solicitud->motivo_rechazo)
+                            <p class="mt-3 text-sm font-medium text-rose-800">Motivo: {{ $solicitud->motivo_rechazo }}</p>
+                        @endif
+                    </div>
+                </div>
+                @else
+                <!-- Responder directamente -->
+                <div class="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-sm">
+                    <div class="border-b border-emerald-200 bg-emerald-50 px-6 py-4">
+                        <h2 class="text-sm font-semibold text-emerald-900">Responder al vecino</h2>
+                    </div>
+                    <div class="p-6">
+                        <form method="POST" action="{{ route('op.solicitud.responder', $solicitud->id) }}" enctype="multipart/form-data" class="space-y-4">
+                            @csrf
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-slate-700">Respuesta</label>
+                                <textarea name="respuesta" rows="5" required minlength="10" placeholder="Escriba la respuesta que verá el vecino..."
+                                          class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0 transition-colors resize-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-slate-700">Adjuntar documentos (opcional)</label>
+                                <input type="file" name="adjuntos[]" multiple accept=".pdf,.jpg,.jpeg"
+                                       class="h-11 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0 transition-colors">
+                            </div>
+                            <button type="submit" class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2">
+                                <span class="flex items-center justify-center">
+                                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Enviar respuesta
+                                </span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
                 <!-- Derivar -->
                 <div class="overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-sm">
                     <div class="border-b border-blue-200 bg-blue-50 px-6 py-4">
@@ -153,6 +215,7 @@
                         </form>
                     </div>
                 </div>
+                @endif
             </div>
         </div>
     </div>

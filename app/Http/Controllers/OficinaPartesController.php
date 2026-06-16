@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Solicitud;
+use App\Models\SolicitudAdjunto;
 use App\Models\SolicitudEvento;
 use App\Models\User;
+use App\Services\SolicitudNotificacionService;
 use Illuminate\Support\Facades\DB;
 
 class OficinaPartesController extends Controller
@@ -113,6 +115,61 @@ class OficinaPartesController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Error al rechazar solicitud: ' . $e->getMessage());
+        }
+    }
+
+    public function responder(Request $request, $id)
+    {
+        $request->validate([
+            'respuesta' => 'required|string|min:10',
+            'adjuntos.*' => 'file|mimes:pdf,jpg,jpeg|max:5120',
+        ]);
+
+        $solicitud = Solicitud::findOrFail($id);
+        if (in_array($solicitud->estado, ['respondida', 'rechazada'])) {
+            return back()->with('error', 'No se puede modificar una solicitud ya respondida o rechazada.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $solicitud->update([
+                'estado' => 'respondida',
+                'respuesta' => $request->respuesta,
+                'fecha_respuesta' => now(),
+            ]);
+
+            if ($request->hasFile('adjuntos')) {
+                foreach ($request->file('adjuntos') as $file) {
+                    $path = $file->store('adjuntos', 'private');
+                    SolicitudAdjunto::create([
+                        'solicitud_id' => $solicitud->id,
+                        'filename' => $file->getClientOriginalName(),
+                        'path' => $path,
+                        'mime' => $file->getMimeType(),
+                        'size' => $file->getSize(),
+                        'uploaded_by' => auth()->id(),
+                    ]);
+                }
+            }
+
+            SolicitudEvento::create([
+                'solicitud_id' => $solicitud->id,
+                'actor_user_id' => auth()->id(),
+                'evento' => 'solicitud_respondida',
+                'estado_nuevo' => 'respondida',
+                'comentario' => 'Respuesta enviada al vecino desde OIRS',
+            ]);
+
+            DB::commit();
+
+            $solicitud->refresh();
+            SolicitudNotificacionService::enviarNotificacionRespuestaSeguro($solicitud);
+
+            return redirect()->route('op.bandeja')
+                ->with('success', 'Respuesta enviada exitosamente al vecino');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error al enviar respuesta: ' . $e->getMessage());
         }
     }
 }

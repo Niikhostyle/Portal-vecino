@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/solicitud/{id}', [OficinaPartesController::class, 'showSolicitud'])->name('solicitud.show');
         Route::post('/derivar/{id}', [OficinaPartesController::class, 'derivar'])->name('solicitud.derivar');
         Route::post('/rechazar/{id}', [OficinaPartesController::class, 'rechazar'])->name('solicitud.rechazar');
+        Route::post('/responder/{id}', [OficinaPartesController::class, 'responder'])->name('solicitud.responder');
     });
 
     // Rutas Funcionario
