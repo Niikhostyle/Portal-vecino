@@ -157,24 +157,28 @@
 <section class="border-t border-slate-200 bg-slate-50 py-12 sm:py-14">
     <div class="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 sm:px-6 lg:grid-cols-12 lg:gap-6 lg:px-8">
 
-        {{-- Banner tradición (imagen placeholder) --}}
+        {{-- Banner tradición --}}
         <div class="lg:col-span-4">
-            <div class="relative overflow-hidden rounded-2xl shadow-md ring-1 ring-slate-200/80">
+            <div class="overflow-hidden rounded-2xl bg-black shadow-md ring-1 ring-slate-200/80">
                 @if($bannerImg)
-                    <img src="{{ $bannerImg }}" alt="Chanco - Tradición que nos une" class="aspect-[4/3] w-full object-cover">
+                    <img src="{{ $bannerImg }}"
+                         alt="Chanco — Ilustre Municipalidad, tradición que nos une"
+                         class="block h-auto w-full object-contain">
                 @else
-                    <div class="flex aspect-[4/3] w-full flex-col items-center justify-center bg-gradient-to-br from-emerald-100 via-sky-100 to-blue-100 p-6">
-                        <svg class="h-12 w-12 text-slate-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        <p class="mt-3 text-center text-sm font-medium text-slate-500">Banner decorativo</p>
-                        <p class="mt-1 text-center text-xs text-slate-400"><code class="rounded bg-white/60 px-1">public/img/dashboard/banner-tradicion.jpg</code></p>
+                    <div class="relative">
+                        <div class="flex aspect-[4/3] w-full flex-col items-center justify-center bg-gradient-to-br from-emerald-100 via-sky-100 to-blue-100 p-6">
+                            <svg class="h-12 w-12 text-slate-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p class="mt-3 text-center text-sm font-medium text-slate-500">Banner decorativo</p>
+                            <p class="mt-1 text-center text-xs text-slate-400"><code class="rounded bg-white/60 px-1">public/img/dashboard/banner-tradicion.jpg</code></p>
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-blue-950/70 via-transparent to-transparent"></div>
+                        <p class="absolute bottom-5 left-5 right-5 font-serif text-2xl font-bold italic leading-tight text-white drop-shadow-lg sm:text-3xl">
+                            Chanco — Tradición que nos une
+                        </p>
                     </div>
                 @endif
-                <div class="absolute inset-0 bg-gradient-to-t from-blue-950/70 via-transparent to-transparent"></div>
-                <p class="absolute bottom-5 left-5 right-5 font-serif text-2xl font-bold italic leading-tight text-white drop-shadow-lg sm:text-3xl">
-                    Chanco — Tradición que nos une
-                </p>
             </div>
         </div>
 
