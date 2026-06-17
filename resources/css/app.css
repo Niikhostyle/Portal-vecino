@@ -412,6 +412,94 @@ a.border-blue-600.bg-blue-600 svg,
     display: none !important;
 }
 
+/* Accesibilidad portal vecino */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.sr-only:focus,
+.sr-only:focus-visible {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 9999;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0.75rem 1rem;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    border-radius: 0.5rem;
+    background-color: #1e3a8a;
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    outline: 3px solid #f59e0b;
+    outline-offset: 2px;
+}
+
+html.a11y-high-contrast body {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+html.a11y-high-contrast .bg-white,
+html.a11y-high-contrast [class*="bg-white"] {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+}
+
+html.a11y-high-contrast a:not([class*="bg-"]) {
+    color: #fde047 !important;
+}
+
+html.a11y-high-contrast header,
+html.a11y-high-contrast nav {
+    background-color: #020617 !important;
+    border-color: #334155 !important;
+}
+
+html.a11y-underline-links a {
+    text-decoration: underline !important;
+    text-underline-offset: 3px;
+}
+
+html.a11y-focus-visible a:focus,
+html.a11y-focus-visible a:focus-visible,
+html.a11y-focus-visible button:focus,
+html.a11y-focus-visible button:focus-visible,
+html.a11y-focus-visible input:focus,
+html.a11y-focus-visible input:focus-visible,
+html.a11y-focus-visible select:focus,
+html.a11y-focus-visible select:focus-visible,
+html.a11y-focus-visible textarea:focus,
+html.a11y-focus-visible textarea:focus-visible,
+html.a11y-focus-visible summary:focus,
+html.a11y-focus-visible summary:focus-visible,
+html.a11y-focus-visible [tabindex]:focus,
+html.a11y-focus-visible [tabindex]:focus-visible {
+    outline: 3px solid #f59e0b !important;
+    outline-offset: 3px !important;
+    box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.45) !important;
+}
+
+html.a11y-focus-visible a:focus:not(:focus-visible),
+html.a11y-focus-visible button:focus:not(:focus-visible) {
+    outline: 3px solid #f59e0b !important;
+    outline-offset: 3px !important;
+    box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.45) !important;
+}
+
 /* Custom scrollbar - Estilo shadcn/ui */
 ::-webkit-scrollbar {
     width: 8px;

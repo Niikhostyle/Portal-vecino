@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Solicitud;
 use App\Models\SolicitudTipo;
 use App\Models\User;
+use App\Services\ChancoNoticiasService;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -162,7 +163,10 @@ class DashboardController extends Controller
         $oirsTipo = SolicitudTipo::where('codigo', 'OIRS')->first();
         $oirsTipoId = $oirsTipo?->id;
 
-        return view('vecino.dashboard', compact('stats', 'charts', 'mis_solicitudes', 'oirsTipoId'));
+        $noticias = app(ChancoNoticiasService::class)->destacadas(3);
+        $noticiasVerTodasUrl = app(ChancoNoticiasService::class)->verTodasUrl();
+
+        return view('vecino.dashboard', compact('stats', 'charts', 'mis_solicitudes', 'oirsTipoId', 'noticias', 'noticiasVerTodasUrl'));
     }
 
     /**

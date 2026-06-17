@@ -42,4 +42,11 @@ return [
         'end_session_url' => 'https://accounts.claveunica.gob.cl/openid/end-session',
     ],
 
+    'chanco' => [
+        'feed_url' => env('CHANCO_FEED_URL', 'https://chanco.cl/feed/'),
+        'wp_api_url' => env('CHANCO_WP_API_URL', 'https://chanco.cl/wp-json/wp/v2'),
+        'noticias_url' => env('CHANCO_NOTICIAS_URL', 'https://chanco.cl'),
+        'cache_ttl' => env('CHANCO_NOTICIAS_CACHE_TTL', 3600),
+    ],
+
 ];
