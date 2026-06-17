@@ -1,6 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.portal-vecino')
 
 @section('title', 'Crear Solicitud: ' . $tipo->titulo)
+@section('nav_mode', 'burger')
+@section('header_title', $tipo->titulo)
 
 @push('styles')
 <style>

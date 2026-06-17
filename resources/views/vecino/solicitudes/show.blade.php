@@ -1,6 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.portal-vecino')
 
 @section('title', 'Detalle Solicitud: ' . $solicitud->folio)
+@section('nav_mode', 'burger')
+@section('header_title', $solicitud->folio)
 
 @section('content')
 <div class="p-6 lg:p-8">

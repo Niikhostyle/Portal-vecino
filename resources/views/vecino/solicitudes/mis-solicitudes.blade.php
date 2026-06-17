@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.portal-vecino')
 
 @section('title', 'Mis Solicitudes')
+@section('nav_mode', 'full')
 
 @section('content')
 <div class="p-6 lg:p-8">
