@@ -66,62 +66,76 @@
 @section('content')
 
 {{-- ═══ HERO ═══ --}}
-<section class="relative overflow-hidden" aria-labelledby="hero-titulo">
-    {{-- Fondo imagen o placeholder --}}
-    <div class="absolute inset-0" aria-hidden="true">
-        @if($heroImg)
-            <img src="{{ $heroImg }}" alt="" class="h-full w-full object-cover">
-        @else
-            <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-200/60 via-sky-200/50 to-blue-300/40">
-                <div class="mx-4 rounded-2xl border-2 border-dashed border-white/60 bg-white/30 px-8 py-6 text-center backdrop-blur-sm">
-                    <svg class="mx-auto h-10 w-10 text-slate-500/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    <p class="mt-2 text-sm font-medium text-slate-600">Imagen de fondo del hero</p>
-                    <p class="mt-1 text-xs text-slate-500">Cargar en <code class="rounded bg-white/50 px-1">public/img/dashboard/hero.jpg</code></p>
+<section class="overflow-hidden bg-slate-200" aria-labelledby="hero-titulo">
+    @if($heroImg)
+        <div class="md:relative">
+            {{-- Imagen: en móvil banner con foco en OIRS; en desktop imagen completa --}}
+            <div class="relative w-full md:block">
+                <img src="{{ $heroImg }}"
+                     alt=""
+                     class="block h-auto w-full max-md:aspect-[16/10] max-md:max-h-[min(42vh,320px)] max-md:w-full max-md:object-cover max-md:object-[72%_center] md:max-h-none md:object-contain md:object-center"
+                     aria-hidden="true" />
+            </div>
+
+            {{-- Panel de texto: debajo en móvil, superpuesto a la izquierda en desktop --}}
+            <div class="relative z-10 -mt-3 px-4 pb-8 pt-0 sm:-mt-4 sm:px-6 sm:pb-10 md:absolute md:inset-0 md:mt-0 md:flex md:items-center md:px-8 md:py-10 md:pb-10 md:pt-10 lg:px-8">
+                <div class="mx-auto w-full max-w-7xl">
+                    <div class="w-full max-w-xl rounded-2xl border border-white/70 bg-white p-5 shadow-xl shadow-slate-900/10 sm:p-6 md:bg-white/92 md:p-8">
+                        <h1 id="hero-titulo" class="text-2xl font-extrabold leading-tight tracking-tight text-blue-950 sm:text-3xl md:text-4xl lg:text-5xl">
+                            Bienvenido/a, {{ $saludo }}
+                        </h1>
+                        <p class="mt-2 text-sm font-semibold text-blue-700 sm:mt-3 sm:text-base lg:text-lg">
+                            Portal OIRS de la Municipalidad de Chanco
+                        </p>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-600 sm:mt-3 sm:text-base">
+                            Aquí puedes realizar consultas, reclamos, sugerencias y felicitaciones de forma fácil y rápida.
+                        </p>
+
+                        <div class="mt-5 flex w-full flex-col gap-2.5 sm:mt-6 sm:flex-row sm:flex-wrap sm:items-stretch sm:gap-3">
+                            <a href="{{ route('vecino.solicitudes') }}"
+                               class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-900 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-900/20 transition hover:bg-blue-800 sm:w-auto sm:px-5">
+                                <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Realizar una solicitud
+                            </a>
+                            <a href="{{ route('vecino.mis-solicitudes') }}"
+                               class="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-blue-900 bg-white px-4 py-3 text-sm font-bold text-blue-900 transition hover:bg-blue-50 sm:w-auto sm:px-5">
+                                <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Ver mis solicitudes
+                            </a>
+                        </div>
+
+                        <p class="mt-4 flex items-start gap-2 text-xs leading-snug text-slate-500 sm:mt-5 sm:items-center sm:text-sm">
+                            <svg class="mt-0.5 h-4 w-4 shrink-0 text-blue-600 sm:mt-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Horario de atención: Lunes a Viernes de 09:00 a 17:00 horas
+                        </p>
+                    </div>
                 </div>
             </div>
-        @endif
-        <div class="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/25 sm:via-white/85 sm:to-transparent"></div>
-    </div>
-
-    <div class="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        <div class="z-10 max-w-xl">
-            <h1 id="hero-titulo" class="text-4xl font-extrabold leading-tight tracking-tight text-blue-950 sm:text-5xl lg:text-[3.25rem]">
-                Bienvenido/a, {{ $saludo }}
-            </h1>
-            <p class="mt-3 text-lg font-semibold text-blue-700 sm:text-xl">
-                Portal OIRS de la Municipalidad de Chanco
-            </p>
-            <p class="mt-4 max-w-lg text-base leading-relaxed text-slate-600">
-                Aquí puedes realizar consultas, reclamos, sugerencias y felicitaciones de forma fácil y rápida.
-            </p>
-
-            <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <a href="{{ route('vecino.solicitudes') }}"
-                   class="inline-flex items-center justify-center gap-2.5 rounded-lg bg-blue-900 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-900/25 transition hover:bg-blue-800 hover:shadow-xl">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
-                    Realizar una solicitud
-                </a>
-                <a href="{{ route('vecino.mis-solicitudes') }}"
-                   class="inline-flex items-center justify-center gap-2.5 rounded-lg border-2 border-blue-900 bg-white px-6 py-3.5 text-sm font-bold text-blue-900 transition hover:bg-blue-50">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    Ver mis solicitudes
-                </a>
-            </div>
-
-            <p class="mt-6 flex items-center gap-2 text-sm text-slate-500">
-                <svg class="h-4 w-4 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                Horario de atención: Lunes a Viernes de 09:00 a 17:00 horas
-            </p>
         </div>
-    </div>
+    @else
+        <div class="relative min-h-[280px] sm:min-h-[320px]">
+            <div class="absolute inset-0" aria-hidden="true">
+                <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-200/60 via-sky-200/50 to-blue-300/40">
+                    <div class="mx-4 rounded-2xl border-2 border-dashed border-white/60 bg-white/30 px-6 py-5 text-center backdrop-blur-sm sm:px-8 sm:py-6">
+                        <p class="text-sm font-medium text-slate-600">Imagen de fondo del hero</p>
+                        <p class="mt-1 text-xs text-slate-500"><code class="rounded bg-white/50 px-1">public/img/dashboard/hero.jpg</code></p>
+                    </div>
+                </div>
+            </div>
+            <div class="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+                <div class="max-w-xl rounded-2xl bg-white/95 p-5 shadow-lg sm:p-8">
+                    <h1 id="hero-titulo" class="text-2xl font-extrabold text-blue-950 sm:text-4xl">Bienvenido/a, {{ $saludo }}</h1>
+                    <p class="mt-2 text-sm font-semibold text-blue-700 sm:mt-3 sm:text-lg">Portal OIRS de la Municipalidad de Chanco</p>
+                </div>
+            </div>
+        </div>
+    @endif
 </section>
 
 {{-- ═══ ¿QUÉ NECESITAS HACER? ═══ --}}
@@ -159,7 +173,7 @@
 
         {{-- Banner tradición --}}
         <div class="lg:col-span-4">
-            <div class="overflow-hidden rounded-2xl bg-black shadow-md ring-1 ring-slate-200/80">
+            <div class="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200/80">
                 @if($bannerImg)
                     <img src="{{ $bannerImg }}"
                          alt="Chanco — Ilustre Municipalidad, tradición que nos une"
